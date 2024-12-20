@@ -13,7 +13,7 @@ pqrBayes(
   iterations = 10000,
   kn = 2,
   degree = 2,
-  robust,
+  robust = TRUE,
   sparse = TRUE,
   hyper = NULL,
   debugging = FALSE

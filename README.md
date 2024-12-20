@@ -32,6 +32,7 @@ The quantile varying coefficient model is robust to data heterogeneity,
 ### pqrBayes 1.0.3 \[2024-12-20\]
 
 - Fixed the issue of no output in the VCselect() function.
+- Added non-robust methods.
 - Updated the documentation.
 
 ## Methods
