@@ -13,6 +13,7 @@ pqrBayes(
   iterations = 10000,
   kn = 2,
   degree = 2,
+  robust = TRUE,
   sparse = TRUE,
   hyper = NULL,
   debugging = FALSE
@@ -34,6 +35,8 @@ pqrBayes(
 \item{kn}{the number of interior knots for B-spline.}
 
 \item{degree}{the degree of B-spline basis.}
+
+\item{robust}{logical flag. If TRUE, robust methods will be used.}
 
 \item{sparse}{logical flag. If TRUE, spike-and-slab priors will be used to shrink coefficients of irrelevant covariates to zero exactly.}
 

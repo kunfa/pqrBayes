@@ -2,7 +2,7 @@ Package: pqrBayes
 Type: Package
 Title: Bayesian Penalized Quantile Regression
 Version: 1.0.3
-Date: 2024-12-04
+Date: 2024-12-20
 Authors@R: c( person("Cen", "Wu", role = c("aut", "cre"),email = "wucen@ksu.edu"),
               person("Kun", "Fan", role = "aut"),
               person("Jie", "Ren", role = "aut"),

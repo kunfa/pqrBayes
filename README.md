@@ -27,6 +27,12 @@ The quantile varying coefficient model is robust to data heterogeneity,
     install.packages("devtools")
     devtools::install_github("cenwu/pqrBayes")
 
+## News
+
+### pqrBayes 1.0.3 \[2024-12-20\]
+
+- Fixed the issue of no output in the VCselect() function.
+- Updated the documentation.
 
 ## Methods
 

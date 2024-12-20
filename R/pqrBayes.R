@@ -9,6 +9,7 @@
 #' @param iterations the number of MCMC iterations.
 #' @param kn the number of interior knots for B-spline.
 #' @param degree the degree of B-spline basis.
+#' @param robust logical flag. If TRUE, robust methods will be used.
 #' @param sparse logical flag. If TRUE, spike-and-slab priors will be used to shrink coefficients of irrelevant covariates to zero exactly.
 #' @param hyper a named list of hyperparameters.
 #' @param debugging logical flag. If TRUE, progress will be output to the console and extra information will be returned.
@@ -65,7 +66,7 @@
 #' {\emph{Statistics in Medicine}, 39: 617– 638} \doi{10.1002/sim.8434}
 
 
-pqrBayes <- function(g, y, u, e=NULL,quant=0.5, iterations=10000, kn=2, degree=2, sparse=TRUE, hyper=NULL,debugging=FALSE){
+pqrBayes <- function(g, y, u, e=NULL,quant=0.5, iterations=10000, kn=2, degree=2, robust = TRUE,sparse=TRUE, hyper=NULL,debugging=FALSE){
   p = dim(g)[2]
   
   x = cbind(1,g)
@@ -126,12 +127,19 @@ pqrBayes <- function(g, y, u, e=NULL,quant=0.5, iterations=10000, kn=2, degree=2
   xi1 = (1-2*quant)/(quant*(1-quant))
   xi2 = sqrt(2/(quant*(1-quant)))
   hatTau = 1
-  hatV = rep(1,n) # rgamma(n, shape=1, rate=hatTau)
+  hatV = rep(1,n) 
   hatEtaSq = 1
   hatSg = rep(1, p)
   hatPi = 0.5
-  # r=a=b=sh0_1=sh0_0=1
-  
+  invTAUsq.star = rep(0.1, p)
+  hat.pi.s = 0.9
+  lambda.star = 1
+  hat.sigma.sq = 1
+  a.star=1
+  b.star = 1.5
+  alpha = 0.2
+  gamma = 0.1
+  mu.star=nu.star=1 
   sh0_1 = ifelse(is.null(hyper$a0), 1, hyper$a0)
   sh0_0 = ifelse(is.null(hyper$b0), 1, hyper$b0)
   
@@ -141,172 +149,16 @@ pqrBayes <- function(g, y, u, e=NULL,quant=0.5, iterations=10000, kn=2, degree=2
   r = ifelse(is.null(hyper$d2), 1, hyper$d2)
   hatbeta=matrix(hat.r,ncol=p) + 10^-5
   progress = ifelse(debugging, 10^(floor(log10(iterations))-1), 0)
-  
+  if(robust){
   if(sparse){fit=BRGL_SS(xx1, y, CLC, p, d, iterations, hatAlpha, hatbeta, hatTau, hatV, hatSg, invSigAlpha0, hatPi, hatEtaSq,
               xi1, xi2, r, a, b, sh0_1, sh0_0, progress)}
   else{fit=BRGL(xx1, y, CLC, p, d, iterations, hatAlpha, hatbeta, hatTau, hatV, hatSg, invSigAlpha0, hatEtaSq,
                 xi1, xi2, r, a, b, progress)}
+  }else{
+    if(sparse){fit=BGLPointMass(xx1, y, CLC, p, d, iterations, hatAlpha, hat.r, invTAUsq.star, invSigAlpha0, hat.pi.s,
+                                lambda.star, hat.sigma.sq, a.star, b.star, alpha, gamma, mu.star, nu.star, progress)}
+    else{fit=BGL(xx1, y, CLC, p, d, iterations, hat.r, hatAlpha, invTAUsq.star, invSigAlpha0, lambda.star, 
+                  hat.sigma.sq, a.star, b.star, alpha, gamma, progress)}
+  }
   
 }
-
-# # identification
-# posterior.BQRGLSS=fit
-# 
-# # 2.5% quantile of posterior samples
-# 
-# c1.C=rep(0,d)
-# for (i in 1:d) {
-#   c1.C[i]=quantile(posterior.BQRGLSS$GS.alpha[5001:10000,i],0.025)
-# }
-# 
-# c2.C=rep(0,dim(posterior.BQRGLSS$GS.beta)[2])
-# for (i in 1:dim(posterior.BQRGLSS$GS.beta)[2]) {
-#   c2.C[i]=quantile(posterior.BQRGLSS$GS.beta[5001:10000,i],0.025)
-# }
-# 
-# coeffmatrix.C1=as.matrix(cbind(c1.C,matrix(c2.C,nrow = d)))
-# 
-# #gamma.hat.BQRGLSS1=pi.u%*% coeffmatrix.C1
-# 
-# # 97.5% quantile of posterior samples
-# 
-# c1.C=rep(0,d)
-# for (i in 1:d) {
-#   c1.C[i]=quantile(posterior.BQRGLSS$GS.alpha[5001:10000,i],0.975)
-# }
-# 
-# c2.C=rep(0,dim(posterior.BQRGLSS$GS.beta)[2])
-# for (i in 1:dim(posterior.BQRGLSS$GS.beta)[2]) {
-#   c2.C[i]=quantile(posterior.BQRGLSS$GS.beta[5001:10000,i],0.975)
-# }
-# 
-# coeffmatrix.C2=as.matrix(cbind(c1.C,matrix(c2.C,nrow = d)))
-# 
-# # 50% quantile of posterior samples
-# 
-# c1.C=rep(0,d)
-# for (i in 1:d) {
-#   c1.C[i]=quantile(posterior.BQRGLSS$GS.alpha[5001:10000,i],0.5)
-# }
-# 
-# c2.C=rep(0,dim(posterior.BQRGLSS$GS.beta)[2])
-# for (i in 1:dim(posterior.BQRGLSS$GS.beta)[2]) {
-#   c2.C[i]=quantile(posterior.BQRGLSS$GS.beta[5001:10000,i],0.5)
-# }
-# 
-# coeffmatrix.C=as.matrix(cbind(c1.C,matrix(c2.C,nrow = d)))
-# 
-# gamma.var.BQRGLSS=pi.star %*% coeffmatrix.C#[,c(1,2,3,4)]
-# gamma.var.BQRGLSS1=pi.star %*% coeffmatrix.C1#[,c(1,2,3,4)]
-# gamma.var.BQRGLSS2=pi.star %*% coeffmatrix.C2#[,c(1,2,3,4)]
-# 
-# #fit$coefficient
-# beta.hat=rep(0,q)
-# for (i in 1:q) {
-#   beta.hat[i]=quantile(posterior.BQRGLSS$GS.alpha[5001:10000,i+d],0.5)
-# }
-# gamma.hat.BQRGLSS=pi.u%*% coeffmatrix.C
-# 
-# 
-# 
-# # prediction error
-# # y.hat=y0=res=rep(0,n)
-# # for (i in 1:n) {
-# #   y.hat[i]=t(x[i,])%*%gamma.hat.BQRGLSS[i,]+t(e[i,])%*%beta.hat
-# #   y0[i]=t(x[i,1:4])%*%gamma.true[i,]+t(e[i,])%*%beta.true
-# #   if((y.hat[i]-y0[i]) >= 0){res[i] = quant*(y.hat[i]-y0[i])}
-# #   else{res[i] = (quant -1)*(y.hat[i]-y0[i])}
-# # }
-# # 
-# # pred.BQRGLSS[h]=mean(res)
-# # pred1.BQRGLSS[h]=mean(abs(y.hat-y0))
-# # IMSE.BQRGLSS[h]=sum(IMSE1.BQRGLSS[h],IMSE2.BQRGLSS[h],IMSE3.BQRGLSS[h],IMSE4.BQRGLSS[h])
-# # identification
-# id.BQRGLSS=posterior.BQRGLSS$idgene
-# # id=rep(0,dim(coeffmatrix.C)[2])
-# # for (i in 1:dim(coeffmatrix.C)[2]) {
-# #   for (j in 1:d) {
-# #     if(coeffmatrix.C1[j,i]*coeffmatrix.C2[j,i]>0){id[i]=1}
-# #   }
-# # }
-# 
-# TP.BQRGLSS[h]=length(which(id[1:3] /5000 > 0.5))
-# FP.BQRGLSS[h]=length(which(id[-c(1:3)] /5000 > 0.5))
-# 
-# 
-# 
-# 
-# 
-# #load("~/Dropbox/Wu group/Bayesian Quantile Regression/varying coefficient/error5-2.RData")
-# COU.BQRGLSS=TP.BQRGLSS+FP.BQRGLSS
-# 
-# C.BQRGLSS=length(which(COU.BQRGLSS==3))/rep
-# O.BQRGLSS=length(which(COU.BQRGLSS>3))/rep
-# U.BQRGLSS=length(which(COU.BQRGLSS<3))/rep
-# 
-# COU.BQRGL=TP.BQRGL+FP.BQRGL
-# 
-# C.BQRGL=length(which(COU.BQRGL==3))/rep
-# O.BQRGL=length(which(COU.BQRGL>3))/rep
-# U.BQRGL=length(which(COU.BQRGL<3))/rep
-# 
-# COU.BQRGLSS10=TP.BQRGLSS10+FP.BQRGLSS10
-# 
-# C.BQRGLSS10=length(which(COU.BQRGLSS10==3))/rep
-# O.BQRGLSS10=length(which(COU.BQRGLSS10>3))/rep
-# U.BQRGLSS10=length(which(COU.BQRGLSS10<3))/rep
-# 
-# COU.BQRGL10=TP.BQRGL10+FP.BQRGL10
-# 
-# C.BQRGL10=length(which(COU.BQRGL10==3))/rep
-# O.BQRGL10=length(which(COU.BQRGL10>3))/rep
-# U.BQRGL10=length(which(COU.BQRGL10<3))/rep
-# 
-# COU.BQRGLSS30=TP.BQRGLSS30+FP.BQRGLSS30
-# 
-# C.BQRGLSS30=length(which(COU.BQRGLSS30==3))/rep
-# O.BQRGLSS30=length(which(COU.BQRGLSS30>3))/rep
-# U.BQRGLSS30=length(which(COU.BQRGLSS30<3))/rep
-# 
-# COU.BQRGL30=TP.BQRGL30+FP.BQRGL30
-# 
-# C.BQRGL30=length(which(COU.BQRGL30==3))/rep
-# O.BQRGL30=length(which(COU.BQRGL30>3))/rep
-# U.BQRGL30=length(which(COU.BQRGL30<3))/rep
-# 
-# COU.BQRGLSS70=TP.BQRGLSS70+FP.BQRGLSS70
-# 
-# C.BQRGLSS70=length(which(COU.BQRGLSS70==3))/rep
-# O.BQRGLSS70=length(which(COU.BQRGLSS70>3))/rep
-# U.BQRGLSS70=length(which(COU.BQRGLSS70<3))/rep
-# 
-# COU.BQRGL70=TP.BQRGL70+FP.BQRGL70
-# 
-# C.BQRGL70=length(which(COU.BQRGL70==3))/rep
-# O.BQRGL70=length(which(COU.BQRGL70>3))/rep
-# U.BQRGL70=length(which(COU.BQRGL70<3))/rep
-# 
-# COU.BQRGLSS90=TP.BQRGLSS90+FP.BQRGLSS90
-# 
-# C.BQRGLSS90=length(which(COU.BQRGLSS90==3))/rep
-# O.BQRGLSS90=length(which(COU.BQRGLSS90>3))/rep
-# U.BQRGLSS90=length(which(COU.BQRGLSS90<3))/rep
-# 
-# COU.BQRGL90=TP.BQRGL90+FP.BQRGL90
-# 
-# C.BQRGL90=length(which(COU.BQRGL90==3))/rep
-# O.BQRGL90=length(which(COU.BQRGL90>3))/rep
-# U.BQRGL90=length(which(COU.BQRGL90<3))/rep
-# 
-# COU.BGLSS=TP.BGLSS+FP.BGLSS
-# 
-# C.BGLSS=length(which(COU.BGLSS==3))/rep
-# O.BGLSS=length(which(COU.BGLSS>3))/rep
-# U.BGLSS=length(which(COU.BGLSS<3))/rep
-# 
-# COU.BGL=TP.BGL+FP.BGL
-# 
-# C.BGL=length(which(COU.BGL==3))/rep
-# O.BGL=length(which(COU.BGL>3))/rep
-# U.BGL=length(which(COU.BGL<3))/rep
-

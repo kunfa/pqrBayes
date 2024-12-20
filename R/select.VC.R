@@ -23,6 +23,25 @@
 #'
 #' @seealso \code{\link{pqrBayes}}
 #'
+#' @examples
+#' data(data)
+#' g=data$g
+#' y=data$y
+#' u=data$u
+#' e=data$e
+#' ## default method
+#' fit1=pqrBayes(g,y,u,e,quant=0.5)
+#' sparse=TRUE
+#' select=VCselect(obj = fit1,sparse = sparse)
+#' select
+#'
+#' \donttest{
+#' ## non-sparse
+#' sparse=FALSE
+#' fit2=pqrBayes(g,y,u,e,quant=0.5,sparse = sparse)
+#' select=VCselect(obj=fit2,sparse=FALSE)
+#' select
+#' }
 #'
 #' @export
 VCselect <- function(obj,sparse,iterations=10000,kn=2, degree=2){
@@ -63,7 +82,10 @@ VCselect <- function(obj,sparse,iterations=10000,kn=2, degree=2){
     id=which(idgene==1)
     VCselect=list(method=method,id=id)
   }
+  
   class(VCselect)="VCselect"
+  return(VCselect)
+ 
 }
   
   

@@ -104,6 +104,7 @@ predict.pqrBayes=function(object, g.new, u.new, e.new=NULL, y.new=NULL, quant=0.
   
   pqrBayes.pred = list(error=pred.error, y.pred=y.hat)
   class(pqrBayes.pred) = "pqrBayes.pred"
+  return(pqrBayes.pred)
   #pred
 }
 
