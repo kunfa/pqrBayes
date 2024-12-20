@@ -82,4 +82,6 @@ Robust <- function(g, y, u, e,quant, iterations, kn, degree,sparse, hyper,debugg
   }else{
     out = list(GS.alpha = fit$GS.alpha, GS.beta = fit$GS.beta)
   }
+  out = out
+  return(out)
 }
