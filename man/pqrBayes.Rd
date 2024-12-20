@@ -85,6 +85,12 @@ fit1
 sparse=FALSE
 fit2=pqrBayes(g,y,u,e,quant=0.5,sparse = sparse)
 fit2
+
+## non-robust
+robust = FALSE
+fit3=pqrBayes(g,y,u,e,quant=0.5,robust = robust)
+fit3
+
 }
 }
 \references{
