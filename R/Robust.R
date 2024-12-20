@@ -77,11 +77,5 @@ Robust <- function(g, y, u, e,quant, iterations, kn, degree,sparse, hyper,debugg
                          xi1, xi2, r, a, b, sh0_1, sh0_0, progress)}
   else{fit=BRGL(xx1, y, CLC, p, d, iterations, hatAlpha, hatbeta, hatTau, hatV, hatSg, invSigAlpha0, hatEtaSq,
                 xi1, xi2, r, a, b, progress)}
-  if(sparse){
-    out = list(GS.alpha = fit$GS.alpha, GS.beta = fit$GS.beta, idgene = fit$idgene)
-  }else{
-    out = list(GS.alpha = fit$GS.alpha, GS.beta = fit$GS.beta)
-  }
-  out = out
-  return(out)
+  fit = fit
 }

@@ -70,11 +70,5 @@ NonRobust <- function(g, y, u, e, quant,iterations, kn, degree,sparse, hyper,deb
                               lambda.star, hat.sigma.sq, a.star, b.star, alpha, gamma, mu.star, nu.star, progress)}
   else{fit=BGL(xx1, y, CLC, p, d, iterations, hat.r, hatAlpha, invTAUsq.star, invSigAlpha0, lambda.star, 
                hat.sigma.sq, a.star, b.star, alpha, gamma, progress)}
-  if(sparse){
-    out = list(GS.alpha = fit$GS.alpha, GS.beta = fit$GS.beta, idgene = fit$idgene)
-  }else{
-    out = list(GS.alpha = fit$GS.alpha, GS.beta = fit$GS.beta)
-  }
-  out = out
-  return(out)
+  fit=fit
 }

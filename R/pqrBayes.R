@@ -80,5 +80,4 @@ pqrBayes <- function(g, y, u, e=NULL,quant=0.5, iterations=10000, kn=2, degree=2
     out = NonRobust(g, y, u, e, quant,iterations, kn, degree,sparse, hyper,debugging)
   }
   fit = out
-  return(fit)
 }
