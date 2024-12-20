@@ -72,7 +72,7 @@
 #' {\emph{Statistics in Medicine}, 39: 617– 638} \doi{10.1002/sim.8434}
 
 
-pqrBayes <- function(g, y, u, e=NULL,quant=0.5, iterations=10000, kn=2, degree=2, robust = TRUE,sparse=TRUE, hyper=NULL,debugging=FALSE){
+pqrBayes <- function(g, y, u, e=NULL,quant=0.5, iterations=10000, kn=2, degree=2, robust,sparse=TRUE, hyper=NULL,debugging=FALSE){
   
   if(robust){
     out = Robust(g, y, u, e,quant, iterations, kn, degree,sparse, hyper,debugging)
