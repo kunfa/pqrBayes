@@ -47,7 +47,7 @@
 VCselect <- function(obj,sparse,iterations=10000,kn=2, degree=2){
   if(sparse){
     method="Sparse"
-    idgene=obj$idgene
+    idgene=obj$posterior$idgene
     id=which(idgene>iterations/4)
     VCselect=list(method=method,id=id)
   }else{
@@ -57,18 +57,18 @@ VCselect <- function(obj,sparse,iterations=10000,kn=2, degree=2){
     
     # 2.5% quantile of posterior samples
 
-    c2.C=rep(0,dim(obj$GS.beta)[2])
-    for (i in 1:dim(obj$GS.beta)[2]) {
-      c2.C[i]=stats::quantile(obj$GS.beta[round(iterations):iterations,i],0.025)
+    c2.C=rep(0,dim(obj$coefficients$GS.beta)[2])
+    for (i in 1:dim(obj$coefficients$GS.beta)[2]) {
+      c2.C[i]=stats::quantile(obj$coefficients$GS.beta[round(iterations):iterations,i],0.025)
     }
 
     coeffmatrix.C1=matrix(c2.C,nrow = d)
 
     # 97.5% quantile of posterior samples
 
-    c2.C=rep(0,dim(obj$GS.beta)[2])
-    for (i in 1:dim(obj$GS.beta)[2]) {
-      c2.C[i]=stats::quantile(obj$GS.beta[round(iterations):iterations,i],0.975)
+    c2.C=rep(0,dim(obj$coefficients$GS.beta)[2])
+    for (i in 1:dim(obj$coefficients$GS.beta)[2]) {
+      c2.C[i]=stats::quantile(obj$coefficients$GS.beta[round(iterations):iterations,i],0.975)
     }
 
     coeffmatrix.C2=matrix(c2.C,nrow = d)

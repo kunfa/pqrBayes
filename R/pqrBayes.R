@@ -79,6 +79,7 @@ pqrBayes <- function(g, y, u, e=NULL,quant=0.5, iterations=10000, kn=2, degree=2
   }else{
     out = NonRobust(g, y, u, e,iterations, kn, degree,sparse,debugging)
   }
-  fit = out
+  coefficient = list(GS.alpha=out$GS.alpha, GS.beta=out$GS.beta)
+  fit = list(posterior = out,coefficients = coefficient)
   return(fit)
 }
