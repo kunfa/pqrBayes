@@ -5,6 +5,16 @@
 
 > Bayesian Penalized Quantile Regression
 
+<!-- badges: start -->
+
+[![CRAN](https://www.r-pkg.org/badges/version/pqrBayes)](https://cran.r-project.org/package=pqrBayes)
+[![Codecov test
+coverage](https://codecov.io/gh/cenwu/pqrBayes/branch/master/graph/badge.svg)](https://app.codecov.io/gh/cenwu/pqrBayes?branch=master)
+[![CRAN RStudio mirror
+downloads](https://cranlogs.r-pkg.org/badges/pqrBayes)](https://www.r-pkg.org:443/pkg/pqrBayes)
+[![R-CMD-check](https://github.com/cenwu/pqrBayes/actions/workflows/R-CMD-check.yaml/badge.svg)](https://github.com/cenwu/pqrBayes/actions/workflows/R-CMD-check.yaml)
+<!-- badges: end -->
+
 The quantile varying coefficient model is robust to data heterogeneity, 
     outliers and heavy-tailed distributions in the response variable due to the check
     loss function in quantile regression. In addition, it can flexibly model the dynamic
