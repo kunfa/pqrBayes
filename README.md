@@ -11,7 +11,7 @@
 [![Codecov test
 coverage](https://codecov.io/gh/cenwu/pqrBayes/branch/master/graph/badge.svg)](https://app.codecov.io/gh/cenwu/pqrBayes?branch=master)
 [![CRAN RStudio mirror
-downloads](https://cranlogs.r-pkg.org/badges/pqrBayes)](https://www.r-pkg.org:443/pkg/pqrBayes)
+downloads](https://cranlogs.r-pkg.org/badges/grand-total/pqrBayes)](https://www.r-pkg.org:443/pkg/pqrBayes)
 [![R-CMD-check](https://github.com/cenwu/pqrBayes/actions/workflows/R-CMD-check.yaml/badge.svg)](https://github.com/cenwu/pqrBayes/actions/workflows/R-CMD-check.yaml)
 <!-- badges: end -->
 
