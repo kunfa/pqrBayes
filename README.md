@@ -93,10 +93,10 @@ Bayesian regularized quantile regression utilizing sparse priors to
     
     coverage3 = coverage(fit3,coefficient,u.grid=NULL, model = "linear")
   
-    CI_RBLSS[rep,] = coverage
-    CI_RBL[rep,]   = coverage1
-    CI_BLSS[rep,]  = coverage2
-    CI_BL[rep,]    = coverage3
+    CI_RBLSS[h,] = coverage
+    CI_RBL[h,]   = coverage1
+    CI_BLSS[h,]  = coverage2
+    CI_BL[h,]    = coverage3
     cat("iteration = ", h, "\n")
     
     }
