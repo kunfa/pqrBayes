@@ -4,14 +4,14 @@
 \alias{coverage}
 \title{95\% empirical coverage probability for a pqrBayes object}
 \usage{
-coverage(object,coefficient,u.grid=NULL,model="linear")
+coverage(object,coefficient,u.grid=NULL,model)
 }
 \arguments{
 \item{object}{the pqrBayes object.}
 
 \item{coefficient}{the vector of true regression coefficients under the sparse linear model (with a continuous response), binary LASSO, group LASSO, or the matrix of true varying coefficients evaluated on the grid points under a varying coefficient model.}
 
-\item{u.grid}{the vector of grid points under a varying coefficient model. When assessing empirical coverage probabilities under a sparse linear model, binary LASSO or group LASSO, u.grid = NULL.}
+\item{u.grid}{the vector of grid points under a varying coefficient model. When assessing empirical coverage probabilities under a sparse linear model, binary LASSO or group LASSO, u.grid = NULL. The default value is NULL.}
 
 \item{model}{the model to be fitted. Users can also choose "linear" for a sparse linear model (with a continuous response), "binary" for binary LASSO, "group" for group LASSO, and "VC" for a sparse varying coefficient model.}
 }
@@ -29,7 +29,7 @@ g=data$g
 y=data$y
 e=data$e
 coeff = data$coeff
-fit1=pqrBayes(g,y,e,d = NULL,quant=0.5,model="linear")
+fit1=pqrBayes(g,y,e,model="linear")
 coverage=coverage(fit1,coeff,model="linear")
 }
 \seealso{

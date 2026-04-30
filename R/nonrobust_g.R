@@ -1,8 +1,5 @@
 NonRobust_g <- function(g, y, e, d,iterations,prior,debugging){
   
-  if (prior %in% c("HS", "HS+", "RHS")) {
-    stop("The specified prior is currently not supported. Only 'SS' (spike-and-slab) prior is implemented.")
-  }
   p = dim(g)[2]
   
   x = cbind(1,g)

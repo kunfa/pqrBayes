@@ -10,7 +10,7 @@ using namespace arma;
 
 
 // [[Rcpp::export()]]
-Rcpp::List BRBLSS (arma::mat xx, arma::vec y, arma::vec ystar, arma::mat W, int maxSteps,arma::vec hatAlpha, arma::vec hatBeta, double hatTau, arma::vec hatV, arma::vec hatSg, arma::mat invSigAlpha0, double hatPi, double hatEtaSq, double xi1, double xi2, double r1, double a, double b, double sh1, double sh0, int progress)
+Rcpp::List BRBLSS (arma::mat xx, arma::vec y, arma::vec ystar, arma::mat W, int maxSteps,arma::vec hatAlpha, arma::vec hatBeta, arma::vec hatV, arma::vec hatSg, arma::mat invSigAlpha0, double hatPi, double hatEtaSq, double xi1, double xi2, double r1, double a, double b, double sh1, double sh0, int progress)
 {
   unsigned int n = xx.n_rows, s = xx.n_cols, q = W.n_cols;
   arma::mat gsAlpha(maxSteps, q),
@@ -21,7 +21,6 @@ Rcpp::List BRBLSS (arma::mat xx, arma::vec y, arma::vec ystar, arma::mat W, int 
   
   arma::vec gsEtaSq(maxSteps),
   gsPi(maxSteps),
-  gsTau(maxSteps),
   gsMSE(maxSteps);
   
   arma::mat varAlpha, tWWoV(q,q), temp;
@@ -32,8 +31,8 @@ Rcpp::List BRBLSS (arma::mat xx, arma::vec y, arma::vec ystar, arma::mat W, int 
   for (int k = 0; k < maxSteps; k++) {
     // Rcpp::Rcout << "ystar" << std::endl;
     
-    mustar = xx * hatBeta + xi1*hatV;
-    sdstar = sqrt(hatV*xi2Sq/hatTau);
+    mustar = W * hatAlpha + xx * hatBeta + xi1*hatV;
+    sdstar = sqrt(hatV*xi2Sq);
     for (int i = 0; i < n; i++) {
         double mean = mustar(i);
         double sd = sdstar(i);
@@ -51,15 +50,15 @@ Rcpp::List BRBLSS (arma::mat xx, arma::vec y, arma::vec ystar, arma::mat W, int 
     res = ystar - xx * hatBeta - xi1*hatV;
     tWWoV = (W.each_col()/hatV).t() * W;
     RWoV = arma::sum(W.each_col()% (res/hatV), 0).t();
-    varAlpha = arma::inv_sympd(tWWoV*hatTau/xi2Sq + invSigAlpha0);
-    meanAlpha = varAlpha * RWoV * hatTau / xi2Sq;
+    varAlpha = arma::inv_sympd(tWWoV/xi2Sq + invSigAlpha0);
+    meanAlpha = varAlpha * RWoV / xi2Sq;
     hatAlpha = mvrnormCpp(meanAlpha, varAlpha);
     res -= W * hatAlpha;
     gsAlpha.row(k) = hatAlpha.t();
     
     // Rcpp::Rcout << "v" << std::endl;
     res += xi1*hatV;
-    lambV = xi1Sq/xi2Sq + 2*hatTau;
+    lambV = xi1Sq/xi2Sq + 2;
     muV = arma::sqrt((xi1Sq+2*xi2Sq) / arma::square(res));
     for(unsigned int i = 0; i<n; i++){
       bool flag = true;
@@ -105,9 +104,9 @@ Rcpp::List BRBLSS (arma::mat xx, arma::vec y, arma::vec ystar, arma::mat W, int 
     for(unsigned int j=0; j<s; j++){
       res += xx.col(j) * hatBeta(j);
       XgXgoV = arma::as_scalar((xx.col(j)/hatV).t() * xx.col(j));
-      varG = 1/(XgXgoV*hatTau/xi2Sq + 1/hatSg(j));
+      varG = 1/(XgXgoV/xi2Sq + 1/hatSg(j));
       
-      RXjToV = arma::sum(xx.col(j) % res / hatV)*hatTau/xi2Sq;
+      RXjToV = arma::sum(xx.col(j) % res / hatV)/xi2Sq;
       meanG = varG * RXjToV;
       
       double lj_temp = std::sqrt(hatSg(j))*std::exp(-0.5*varG*pow(RXjToV,2))/std::sqrt(varG);
@@ -134,12 +133,6 @@ Rcpp::List BRBLSS (arma::mat xx, arma::vec y, arma::vec ystar, arma::mat W, int 
     hatPi = R::rbeta(shape1, shape2);
     gsPi(k) = hatPi;
     
-    // Rcpp::Rcout << "tau" << std::endl;
-    double shape = a + 3*n/2;
-    ResSqoV = arma::accu(arma::square(res)/hatV);
-    double rate = b + arma::accu(hatV) + ResSqoV/(2*xi2Sq);
-    hatTau = R::rgamma(shape, 1/rate);
-    gsTau(k) = hatTau;
     
     gsMSE(k) = arma::mean(arma::abs(res));
     if(k % 100 == 0){
@@ -152,7 +145,7 @@ Rcpp::List BRBLSS (arma::mat xx, arma::vec y, arma::vec ystar, arma::mat W, int 
   
   return Rcpp::List::create(Rcpp::Named("GS.alpha") = gsAlpha,
                             Rcpp::Named("GS.beta") = gsBeta,
-                            Rcpp::Named("GS.tau") = gsTau,
+                           
                             Rcpp::Named("GS.ystar") = gsystar,
                            
                             Rcpp::Named("GS.v") = gsV,

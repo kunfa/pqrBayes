@@ -1,4 +1,4 @@
-pqrBayes_vc <- function(g, y, e=NULL,quant=0.5, iterations=10000, burn.in, robust=TRUE,prior="SS", hyper=NULL,debugging=FALSE){
+pqrBayes_vc <- function(g, y, u, e=NULL,quant=0.5, iterations=10000, burn.in, robust=TRUE,prior="SS", hyper=NULL,debugging=FALSE){
   if(iterations<1) stop("iterations must be a positive integer.")
   if(is.null(burn.in)){
     BI = floor(iterations)/2
@@ -9,19 +9,9 @@ pqrBayes_vc <- function(g, y, e=NULL,quant=0.5, iterations=10000, burn.in, robus
     stop("burn.in must be a positive integer.")
   }
   n = length(y)
-  u = stats::runif(n,0.01,0.99)
   kn=2
   degree=2
-  # Check quant
-  if (robust) {
-    if (is.null(quant)) {
-      stop("quant must be specified when robust = TRUE.")
-    }
-  } else {
-    if (!is.null(quant)) {
-      stop("quant must be NULL when robust = FALSE.")
-    }
-  }
+  
   if(robust){
     out = Robust_vc(g, y, u, e,quant, iterations, kn, degree, prior, hyper,debugging)
   }else{

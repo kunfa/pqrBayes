@@ -7,14 +7,15 @@
 pqrBayes(
   g,
   y,
-  e,
+  u = NULL,
+  e = NULL,
   d = NULL,
   quant = 0.5,
   iterations = 10000,
   burn.in = NULL,
   robust = TRUE,
   prior = "SS",
-  model = "linear",
+  model,
   hyper = NULL,
   debugging = FALSE
 )
@@ -24,9 +25,11 @@ pqrBayes(
 
 \item{y}{the response variable.}
 
-\item{e}{a matrix of clinical covariates not subject to selection.}
+\item{u}{a vector of effect modifying variable of the quantile varying coefficient model. When fitting a linear model or group LASSO, u = NULL. The default value is NULL.}
 
-\item{d}{a positive integer denotes the group size. When fitting a sparse linear or varying coefficient model, d = NULL.}
+\item{e}{a matrix of clinical covariates not subject to selection. The default value is NULL.}
+
+\item{d}{a positive integer denotes the group size. When fitting a sparse linear or varying coefficient model, d = NULL. The default value is NULL.}
 
 \item{quant}{the quantile level specified by users. Required when robust = TRUE. Ignored (set to NULL) when robust = FALSE.The default value is 0.5.}
 
@@ -94,25 +97,15 @@ g_1=data_1$g
 y_1=data_1$y
 e_1=data_1$e
 
-fit1=pqrBayes(g,y,e,d=NULL,quant=0.5,model="linear")
-fit1_1=pqrBayes(g_1,y_1,e_1,d=NULL,quant=0.5,model="binary")
+fit1=pqrBayes(g,y,e,model="linear")
+fit1_1=pqrBayes(g_1,y_1,e_1,model="binary")
 \donttest{
 
 ## Non-sparse robust example (Bayesian Quantile LASSO)
-fit2 <- pqrBayes(
-  g = g, y = y, e = e, d = NULL,
-  quant = 0.5,
-  prior = "Laplace",
-  model = "linear"
-)
+fit2 <- pqrBayes(g, y, e, prior = "Laplace", model = "linear")
 
 ## Non-robust example (Bayesian LASSO)
-fit3 <- pqrBayes(
-  g = g, y = y, e = e, d = NULL,
-  quant = NULL,
-  robust = FALSE,
-  model = "linear"
-)
+fit3 <- pqrBayes(g, y, e, quant = NULL, robust = FALSE, model = "linear")
 }
 
 ## The Bayesian quantile group LASSO model
@@ -122,24 +115,14 @@ g=data$g
 y=data$y
 e=data$e
 
-fit1=pqrBayes(g,y,e,d=3,quant=0.5,model="group")
+fit1=pqrBayes(g,y,e,d=3,model="group")
 \donttest{
 
 ## Non-sparse robust Bayesian version
-fit2 <- pqrBayes(
-  g = g, y = y, e = e, d = 3,
-  quant = 0.5,
-  prior = "Laplace",
-  model = "group"
-)
+fit2 <- pqrBayes(g, y, e, d = 3, prior = "Laplace", model = "group")
 
 ## Non-robust Bayesian version
-fit3 <- pqrBayes(
-  g = g, y = y, e = e, d = 3,
-  quant = NULL,
-  robust = FALSE,
-  model = "group"
-)
+fit3 <- pqrBayes(g, y, e, d = 3, quant = NULL, robust = FALSE, model = "group")
 }
 ## The regularized Bayesian quantile varying coefficient model
 data(data)
@@ -147,25 +130,16 @@ data = data$data_varying
 g=data$g
 y=data$y
 e=data$e
-fit1=pqrBayes(g,y,e,quant=0.5,model="VC")
+u=data$u
+fit1=pqrBayes(g,y,u,e,model="VC")
 
 \donttest{
 
 ## Non-sparse robust Bayesian example
-fit2 <- pqrBayes(
-  g = g, y = y, e = e,
-  quant = 0.5,
-  prior = "Laplace",
-  model = "VC"
-)
+fit2 <- pqrBayes(g, y, u, e, prior = "Laplace", model = "VC")
 
 ## Non-robust Bayesian example
-fit3 <- pqrBayes(
-  g = g, y = y, e = e,
-  quant = NULL,
-  robust = FALSE,
-  model = "VC"
-)
+fit3 <- pqrBayes(g, y, u, e, quant = NULL,robust = FALSE, model = "VC")
 }
 }
 \references{

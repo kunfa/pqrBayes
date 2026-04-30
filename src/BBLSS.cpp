@@ -11,7 +11,7 @@ using namespace arma;
 
 
 // [[Rcpp::export()]]
-Rcpp::List BBLSS (arma::mat xx, arma::vec y, arma::vec ystar, arma::mat W, int maxSteps, arma::vec hatAlpha, arma::vec hatBeta, arma::vec hatInvTauSq, arma::mat invSigAlpha0, double hatPi, double hatLambdaSq, double hatSigmaSq, double aStar, double bStar, double alpha, double gamma, double sh1, double sh0, int progress)
+Rcpp::List BBLSS (arma::mat xx, arma::vec y, arma::vec ystar, arma::mat W, int maxSteps, arma::vec hatAlpha, arma::vec hatBeta, arma::vec hatInvTauSq, arma::mat invSigAlpha0, double hatPi, double hatLambdaSq, double aStar, double bStar, double alpha, double gamma, double sh1, double sh0, int progress)
 {
   unsigned int n = xx.n_rows, s = xx.n_cols, clc = W.n_cols;
   arma::mat gsAlpha(maxSteps, clc),
@@ -21,7 +21,6 @@ Rcpp::List BBLSS (arma::mat xx, arma::vec y, arma::vec ystar, arma::mat W, int m
   gsLS(maxSteps, s);
   
   arma::vec gsLambda(maxSteps),
-  gsSigmaSq(maxSteps),
   gsPiStar(maxSteps),
   gsMSE(maxSteps);
   
@@ -32,8 +31,8 @@ Rcpp::List BBLSS (arma::mat xx, arma::vec y, arma::vec ystar, arma::mat W, int m
   
   for (int k = 0; k < maxSteps; k++) {
     // Rcpp::Rcout << "ystar" << std::endl;
-    mustar = xx * hatBeta;
-    sdstar = sqrt(hatSigmaSq)*arma::ones(n);
+    mustar = W* hatAlpha + xx * hatBeta;
+    sdstar = arma::ones(n);
     
     for (int i = 0; i < n; i++) {
       double mean = mustar(i);
@@ -49,9 +48,9 @@ Rcpp::List BBLSS (arma::mat xx, arma::vec y, arma::vec ystar, arma::mat W, int m
     gsystar.row(k) = ystar.t();
     
     // Rcpp::Rcout << "alpha" << std::endl;
-    varAlpha = arma::inv(tWW/hatSigmaSq + invSigAlpha0);
+    varAlpha = arma::inv(tWW + invSigAlpha0);
     res = ystar - xx * hatBeta;
-    meanAlpha = varAlpha * (W.t() * res/hatSigmaSq);
+    meanAlpha = varAlpha * (W.t() * res);
     hatAlpha = mvrnormCpp(meanAlpha, varAlpha);
     res -= W * hatAlpha;
     gsAlpha.row(k) = hatAlpha.t();
@@ -60,10 +59,10 @@ Rcpp::List BBLSS (arma::mat xx, arma::vec y, arma::vec ystar, arma::mat W, int m
     for(unsigned int j=0; j<s; j++){
       res += xx.col(j) * hatBeta(j);
       tempS = 1/(tXX(j) + hatInvTauSq(j));
-      varRs = hatSigmaSq * tempS;
+      varRs = tempS;
       XjTRes = arma::as_scalar(xx.col(j).t() * res);
       meanRs = tempS * XjTRes;
-      double lS_temp = std::exp(-0.5/hatSigmaSq*tempS*XjTRes*XjTRes)/std::sqrt(hatInvTauSq(j))/std::sqrt(tempS);
+      double lS_temp = std::exp(-0.5/tempS*XjTRes*XjTRes)/std::sqrt(hatInvTauSq(j))/std::sqrt(tempS);
       lS = hatPi/(hatPi+(1-hatPi)*lS_temp);
       gsLS(k, j) = lS;
       t = R::runif(0, 1);
@@ -78,7 +77,7 @@ Rcpp::List BBLSS (arma::mat xx, arma::vec y, arma::vec ystar, arma::mat W, int m
     
     // Rcpp::Rcout << "invTAUsq.star" << std::endl;
     lInvTauSqStar = hatLambdaSq;
-    muInvTauSqStar = std::sqrt(hatLambdaSq * hatSigmaSq) / arma::abs(hatBeta);		
+    muInvTauSqStar = std::sqrt(hatLambdaSq) / arma::abs(hatBeta);		
     for(unsigned int j = 0; j<s; j++){
       if(hatBeta(j) == 0){
         hatInvTauSq(j) = 1/R::rexp(2/lInvTauSqStar);
@@ -99,12 +98,6 @@ Rcpp::List BBLSS (arma::mat xx, arma::vec y, arma::vec ystar, arma::mat W, int m
     hatPi = R::rbeta(shape1, shape2);
     gsPiStar(k) = hatPi;
     
-    // sigma.sq|
-    double shapeSig = alpha + n/2 + arma::accu(hatBeta != 0)/2;		
-    double rateSig = gamma + 0.5*(arma::accu(arma::square(res)) + 
-                                  arma::accu(square(hatBeta) % hatInvTauSq));
-    hatSigmaSq = 1/R::rgamma(shapeSig, 1/rateSig);
-    gsSigmaSq(k) = hatSigmaSq;
     
     
     gsMSE(k) = arma::mean(arma::square(res));
@@ -121,6 +114,6 @@ Rcpp::List BBLSS (arma::mat xx, arma::vec y, arma::vec ystar, arma::mat W, int m
                              Rcpp::Named("GS.ystar") = gsystar,
                              Rcpp::Named("GS.pi") = gsPiStar,
                              Rcpp::Named("GS.lambda.sq") = gsLambda,
-                             Rcpp::Named("GS.sigma.sq") = gsSigmaSq,
+                             
                              Rcpp::Named("GS.lS") = gsLS);
 }
