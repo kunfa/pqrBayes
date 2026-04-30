@@ -4,9 +4,9 @@
 #'
 #' @param object an object of class `pqrBayes'.
 #' @param coefficient the vector of quantile regression coefficients under a sparse linear model (with a continuous response), binary LASSO and group LASSO or the matrix of true varying coefficients evaluated on the grid points under a varying coefficient model.
-#' @param u.grid the vector of grid points under a varying coefficient model. When fitting a sparse linear model, binary LASSO or group LASSO, u.grid = NULL.
+#' @param u.grid the vector of grid points under a varying coefficient model. When fitting a sparse linear model, binary LASSO or group LASSO, u.grid = NULL. The default value is NULL.
 #' @param model the model to be fitted. Users can choose "linear" for a sparse linear model (with a continuous response), "binary" for binary LASSO, "group" for group LASSO or "VC" for a varying coefficient model.
-#' @usage estimation.pqrBayes(object,coefficient,u.grid=NULL,model="linear")
+#' @usage estimation.pqrBayes(object,coefficient,u.grid=NULL,model)
 #' @return  an object of class `pqrBayes.est' is returned, which is a list with components:
 #' \item{error}{mean square error or integrated mean square errors and total integrated mean square error.}
 #' \item{coeff.est}{estimated values of the regression coefficients or the varying coefficients.}
@@ -19,12 +19,23 @@
 #' y=data$y
 #' e=data$e
 #' coeff = data$coeff
-#' fit1=pqrBayes(g,y,e,d = NULL,quant=0.5,model="linear")
+#' fit1=pqrBayes(g,y,e,model="linear")
 #' estimation=estimation.pqrBayes(fit1,coeff,model="linear")
 
 #'
 #' @export
-estimation.pqrBayes = function(object,coefficient,u.grid=NULL,model="linear"){
+estimation.pqrBayes = function(object,coefficient,u.grid=NULL,model){
+  if (model != "VC" && !is.null(u.grid)) {
+    
+    stop("Argument 'u.grid' should be NULL unless model = 'VC'.")
+    
+  }
+  
+  if (model == "VC" && is.null(u.grid)) {
+    
+    stop("Argument 'u.grid' must be provided when model = 'VC'.")
+    
+  }
   if(model=="VC"){
     pqrBayes.est = estimation_vc(object,coefficient,u.grid)
   }

@@ -6,9 +6,9 @@
 #'
 #' @param object the pqrBayes object.
 #' @param coefficient the vector of true regression coefficients under the sparse linear model (with a continuous response), binary LASSO, group LASSO, or the matrix of true varying coefficients evaluated on the grid points under a varying coefficient model.
-#' @param u.grid the vector of grid points under a varying coefficient model. When assessing empirical coverage probabilities under a sparse linear model, binary LASSO or group LASSO, u.grid = NULL.
+#' @param u.grid the vector of grid points under a varying coefficient model. When assessing empirical coverage probabilities under a sparse linear model, binary LASSO or group LASSO, u.grid = NULL. The default value is NULL.
 #' @param model the model to be fitted. Users can also choose "linear" for a sparse linear model (with a continuous response), "binary" for binary LASSO, "group" for group LASSO, and "VC" for a sparse varying coefficient model.
-#' @usage coverage(object,coefficient,u.grid=NULL,model="linear")
+#' @usage coverage(object,coefficient,u.grid=NULL,model)
 #' @return c
 #' @seealso \code{\link{pqrBayes}}
 #' @examples
@@ -19,10 +19,21 @@
 #' y=data$y
 #' e=data$e
 #' coeff = data$coeff
-#' fit1=pqrBayes(g,y,e,d = NULL,quant=0.5,model="linear")
+#' fit1=pqrBayes(g,y,e,model="linear")
 #' coverage=coverage(fit1,coeff,model="linear")
 #' @export
-coverage = function(object,coefficient,u.grid=NULL,model="linear"){
+coverage = function(object,coefficient,u.grid=NULL,model){
+  if (model != "VC" && !is.null(u.grid)) {
+    
+    stop("Argument 'u.grid' should be NULL unless model = 'VC'.")
+    
+  }
+  
+  if (model == "VC" && is.null(u.grid)) {
+    
+    stop("Argument 'u.grid' must be provided when model = 'VC'.")
+    
+  }
   if(model=="VC"){
     c = coverage_vc(object,coefficient,u.grid)
   }

@@ -4,8 +4,8 @@
 #'
 #' @param object a pqrBayes object.
 #' @param g.new a matrix of new predictors (e.g. genetic factors) at which predictions are to be made. When being applied to the sparse linear, binary LASSO or group LASSO, g.new = g.
-#' @param u.new a vector of new environmental factor at which predictions are to be made. When being applied to the sparse linear model, binary LASSO or group LASSO, u.new = e.
-#' @param e.new a vector or matrix of new clinical covariates at which predictions are to be made.
+#' @param u.new a vector of new environmental factor at which predictions are to be made. When being applied to the sparse linear model, binary LASSO or group LASSO, u.new = NULL. The default value is NULL.
+#' @param e.new a vector or matrix of new clinical covariates at which predictions are to be made. The default value is NULL.
 #' @param y.new a vector of the response of new observations. When being applied to the sparse linear model, binary LASSO or group LASSO, y.new = y.
 #' @param robust logical flag. If TRUE, robust methods are used. Otherwise, non-robust methods are used. The default value is TRUE.
 #' @param quant the quantile level specified by users. Required when robust = TRUE. Ignored (set to NULL) when robust = FALSE.The default value is 0.5.
@@ -30,10 +30,31 @@
 #' g=data$g
 #' y=data$y
 #' e=data$e
-#' fit1=pqrBayes(g,y,e,d = NULL,quant=0.5,model="linear")
-#' prediction=predict_pqrBayes(fit1,g,u.new=e,e.new = NULL, y.new = y, model="linear")
+#' fit1=pqrBayes(g,y,e,model="linear")
+#' prediction=predict_pqrBayes(fit1,g, y.new = y, model="linear")
 #' @export
-predict_pqrBayes=function(object, g.new, u.new, e.new=NULL, y.new, robust=T, quant=0.5,model,...){
+predict_pqrBayes=function(object, g.new, u.new=NULL, e.new=NULL, y.new, robust=T, quant=0.5,model,...){
+  if (model != "VC" && !is.null(u.new)) {
+    
+    stop("Argument 'u.new' should be NULL unless model = 'VC'.")
+    
+  }
+  
+  if (model == "VC" && is.null(u.new)) {
+    
+    stop("Argument 'u.new' must be provided when model = 'VC'.")
+    
+  }
+  # quant check
+  if (robust) {
+    if (is.null(quant)) {
+      stop("quant must be specified when robust = TRUE.")
+    }
+  } else {
+    if (!is.null(quant)) {
+      stop("quant must be NULL when robust = FALSE.")
+    }
+  }
   if(model=="VC"){
     pqrBayes.pred = predict_vc(object, g.new, u.new, e.new, y.new, robust, quant,...)
   }else if(model=="linear"){

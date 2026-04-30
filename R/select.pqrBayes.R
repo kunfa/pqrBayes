@@ -17,7 +17,7 @@
 #' Barbieri, M.M. and Berger, J.O. (2004). Optimal predictive model selection. {\emph{Ann. Statist}, 32(3):870–897}
 #'
 #' @rdname select.pqrBayes
-#' @usage pqrBayes.select(object,prior="SS",model="linear")
+#' @usage pqrBayes.select(object,prior="SS",model)
 #' @return an object of class `select' is returned, which includes the indices of the selected predictors (e.g. genetic factors).
 #'
 #' @seealso \code{\link{pqrBayes}}
@@ -30,8 +30,8 @@
 #' y=data$y
 #' e=data$e
 #' 
-#' fit1=pqrBayes(g,y,e,d = NULL,quant=0.5,model="linear")
-#' select=pqrBayes.select(obj = fit1,prior = "SS",model="linear")
+#' fit1=pqrBayes(g,y,e,model="linear")
+#' select=pqrBayes.select(obj = fit1,model="linear")
 #' 
 #' ## The quantile varying coefficient model
 #' data(data)
@@ -39,26 +39,26 @@
 #' g=data$g
 #' y=data$y
 #' e=data$e
-#' fit1=pqrBayes(g,y,e,d = NULL,quant=0.5,model="VC")
-#' select=pqrBayes.select(obj = fit1,prior = "SS",model="VC")
+#' u=data$u
+#' fit1=pqrBayes(g,y,u,e,model="VC")
+#' select=pqrBayes.select(obj = fit1, model="VC")
 #' select
 #'
 #' \donttest{
 #' ## Non-sparse example with VC model
-#' fit2 <- pqrBayes(
-#'   g = g, y = y, e = e, d = NULL,
-#'   quant = 0.5,
-#'   prior= "Laplace",
-#'   model = "VC"
-#' )
+#' fit2 <- pqrBayes(g, y, u, e, prior= "Laplace", model = "VC")
 #'
-#' select <- pqrBayes.select(obj = fit2, prior = "SS", model = "VC")
+#' select <- pqrBayes.select(obj = fit2, model = "VC")
 #' select
 #' }
 
 #'
 #' @export
-pqrBayes.select <- function(object,prior="SS",model="linear"){
+pqrBayes.select <- function(object,prior="SS",model){
+  
+  if (!prior %in% c("SS", "HS", "HS+", "RHS", "Laplace")) {
+    stop("prior should be one of: 'SS', 'HS', 'HS+', 'RHS' or 'Laplace'.")
+  }
   if(model=="VC"){
     select = VCselect(obj = object,prior)
   }

@@ -14,16 +14,6 @@ pqrBayes_lin <- function(g, y, e, quant = 0.5, iterations = 10000, burn.in,
     stop("burn.in must be a positive integer.")
   }
   
-  # quant check
-  if (robust) {
-    if (is.null(quant)) {
-      stop("quant must be specified when robust = TRUE.")
-    }
-  } else {
-    if (!is.null(quant)) {
-      stop("quant must be NULL when robust = FALSE.")
-    }
-  }
   
   # Call appropriate model
   if (robust) {

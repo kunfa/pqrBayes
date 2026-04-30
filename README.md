@@ -42,7 +42,7 @@ Bayesian regularized quantile regression utilizing two major classes of shrinkag
     devtools::install_github("cenwu/pqrBayes")
 
 - Released versions of pqrBayes are available on CRAN
-    <!-- [(link)](https://cran.r-project.org/package=pqrBayes) --> ,
+    [(link)](https://cran.r-project.org/package=pqrBayes),
     and can be installed within R via
 
 <!-- end list -->
@@ -66,7 +66,8 @@ Bayesian regularized quantile regression utilizing two major classes of shrinkag
      }
     xx = MASS::mvrnorm(n,rep(0,p),sig1)
     x = cbind(1,xx)
-    error=rt(n,2) -quantile(rt(n,2),probs = quant) # can also be changed to normal error for non-robust setting
+    error0 = rt(n,2)
+    error= error0 -quantile(error0,probs = quant) # can also be changed to normal error for non-robust setting
     beta = c(0,1,1.5,2,rep(0,p-3))
     betaa = beta[-1]
     y = x%*%beta+error
@@ -179,7 +180,8 @@ Bayesian regularized quantile regression utilizing two major classes of shrinkag
      }
     xx = MASS::mvrnorm(n,rep(0,p),sig1)
     x = cbind(1,xx)
-    error=rt(n,2) -quantile(rt(n,2),probs = quant) # can also be changed to normal error for non-robust setting
+    error0 = rt(n,2)
+    error= error0 -quantile(error0,probs = quant) # can also be changed to normal error for non-robust setting
     beta = c(0,1,1.5,2,rep(0,p-3))
     betaa = beta[-1]
     y = x%*%beta+error
@@ -321,7 +323,8 @@ Bayesian regularized quantile regression utilizing two major classes of shrinkag
      }
     x = MASS::mvrnorm(n,rep(0,p),sig1)
     x = cbind(1,x)
-    error=rt(n,2) -quantile(rt(n,2),probs = quant)
+    error0 = rt(n,2)
+    error= error0 -quantile(error0,probs = quant)
     u = runif(n,0.01,0.99)
     gamma0 = 2+2*sin(u*2*pi)
     gamma2 = -6*u*(1-u)
@@ -333,7 +336,7 @@ Bayesian regularized quantile regression utilizing two major classes of shrinkag
     }
 #### 95% empirical coverage probabilities for sparse varying coefficients
 
-    n=250; p=100; # the actual dimension after basis expansion is 505
+    n=200; p=100; # the actual dimension after basis expansion is 505
     rep=200;
     quant = 0.5; # focus on median for Bayesian inference
 
@@ -356,22 +359,22 @@ Bayesian regularized quantile regression utilizing two major classes of shrinkag
     
     # BQRVCSS: Bayesian regularized quantile VC model with spike-and-slab priors (Zhou et al., CSDA, 2023)
 
-    fit = pqrBayes(g, y,e=NULL, d = NULL, quant=quant, iterations=10000, burn.in = NULL, robust = TRUE, prior="SS", model = "VC", hyper=NULL,debugging=FALSE)
+    fit = pqrBayes(g, y, u, e=NULL, d = NULL, quant=quant, iterations=10000, burn.in = NULL, robust = TRUE, prior="SS", model = "VC", hyper=NULL,debugging=FALSE)
     coverage = coverage(fit,coefficient,u.grid, model = "VC")
     
     # BQRVC: Bayesian regularized quantile VC model (Zhou et al., CSDA, 2023)
 
-    fit1 = pqrBayes(g, y,e=NULL, d =NULL,quant=quant, iterations=10000, burn.in = NULL, robust = TRUE, prior = "Laplace", model = "VC", hyper=NULL,debugging=FALSE)
+    fit1 = pqrBayes(g, y, u, e=NULL, d =NULL,quant=quant, iterations=10000, burn.in = NULL, robust = TRUE, prior = "Laplace", model = "VC", hyper=NULL,debugging=FALSE)
     coverage1 = coverage(fit1,coefficient,u.grid, model = "VC")
     
     # BVCSS: Bayesian regularized VC model with spike-and-slab priors (Zhou et al., CSDA, 2023)
   
-    fit2 = pqrBayes(g, y,e=NULL, d =NULL, quant=NULL, iterations=10000, burn.in = NULL, robust = FALSE, prior = "SS", model = "VC", hyper=NULL,debugging=FALSE)
+    fit2 = pqrBayes(g, y, u, e=NULL, d =NULL, quant=NULL, iterations=10000, burn.in = NULL, robust = FALSE, prior = "SS", model = "VC", hyper=NULL,debugging=FALSE)
     coverage2 = coverage(fit2,coefficient,u.grid, model = "VC")
     
     # BVC: Bayesian regularized VC model (Zhou et al., CSDA, 2023)
   
-    fit3 = pqrBayes(g, y,e=NULL, d =NULL, quant=NULL, iterations=10000, burn.in = NULL, robust = FALSE, prior = "Laplace", model = "VC", hyper=NULL,debugging=FALSE)
+    fit3 = pqrBayes(g, y, u, e=NULL, d =NULL, quant=NULL, iterations=10000, burn.in = NULL, robust = FALSE, prior = "Laplace", model = "VC", hyper=NULL,debugging=FALSE)
     coverage3 = coverage(fit3,coefficient,u.grid,model = "VC")
     
     CI_BQRVCSS = rbind(CI_BQRVCSS,coverage)
@@ -403,7 +406,8 @@ Bayesian regularized quantile regression utilizing two major classes of shrinkag
      }
     xx = MASS::mvrnorm(n,rep(0,p),sig1)
     x = cbind(1,xx)
-    error=rt(n,2) -quantile(rt(n,2),probs = quant) # can also be changed to normal error for non-robust setting
+    error0 = rt(n,2)
+    error= error0 -quantile(error0,probs = quant) # can also be changed to normal error for non-robust setting
     beta = c(0,1,1.5,2,0,0,0,0.5,0.55,0.6,rep(0,p-9))
     betaa = beta[-1]
     y = x%*%beta+error

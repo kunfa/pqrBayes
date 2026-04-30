@@ -4,7 +4,7 @@
 \alias{pqrBayes.select}
 \title{Variable selection for a pqrBayes object}
 \usage{
-pqrBayes.select(object,prior="SS",model="linear")
+pqrBayes.select(object,prior="SS",model)
 }
 \arguments{
 \item{object}{a pqrBayes object.}
@@ -32,8 +32,8 @@ g=data$g
 y=data$y
 e=data$e
 
-fit1=pqrBayes(g,y,e,d = NULL,quant=0.5,model="linear")
-select=pqrBayes.select(obj = fit1,prior = "SS",model="linear")
+fit1=pqrBayes(g,y,e,model="linear")
+select=pqrBayes.select(obj = fit1,model="linear")
 
 ## The quantile varying coefficient model
 data(data)
@@ -41,20 +41,16 @@ data = data$data_varying
 g=data$g
 y=data$y
 e=data$e
-fit1=pqrBayes(g,y,e,d = NULL,quant=0.5,model="VC")
-select=pqrBayes.select(obj = fit1,prior = "SS",model="VC")
+u=data$u
+fit1=pqrBayes(g,y,u,e,model="VC")
+select=pqrBayes.select(obj = fit1, model="VC")
 select
 
 \donttest{
 ## Non-sparse example with VC model
-fit2 <- pqrBayes(
-  g = g, y = y, e = e, d = NULL,
-  quant = 0.5,
-  prior= "Laplace",
-  model = "VC"
-)
+fit2 <- pqrBayes(g, y, u, e, prior= "Laplace", model = "VC")
 
-select <- pqrBayes.select(obj = fit2, prior = "SS", model = "VC")
+select <- pqrBayes.select(obj = fit2, model = "VC")
 select
 }
 

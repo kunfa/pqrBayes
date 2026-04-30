@@ -1,7 +1,5 @@
 Robust_bin <- function(g, y, e, quant, iterations, prior,hyper,debugging){
-  if (prior %in% c("HS", "HS+", "RHS")) {
-    stop("The specified prior is currently not supported. Only 'SS' (spike-and-slab) prior is implemented.")
-  }
+  
   p = dim(g)[2]
   
   x = cbind(1,g)
@@ -23,7 +21,6 @@ Robust_bin <- function(g, y, e, quant, iterations, prior,hyper,debugging){
   xi2 = sqrt(2/(quant*(1-quant)))
   hatBeta=rep(1,p)
   hatSg=rep(1,p)
-  hatTau = 1
   hatV = rep(1,n) 
   hatEtaSq = 1
   hatPi = 0.5
@@ -38,8 +35,8 @@ Robust_bin <- function(g, y, e, quant, iterations, prior,hyper,debugging){
   
   progress = ifelse(debugging, 10^(floor(log10(iterations))-1), 0)
   if(prior=="SS"){
-    fit=BRBLSS(g, y, ystar, w, iterations, hatAlpha, hatBeta, hatTau, hatV, hatSg, invSigAlpha0, hatPi, hatEtaSq, xi1, xi2, r, a, b,sh0_1,sh0_0, progress)}
-  else if(prior=="Laplace"){fit= BRBL(g, y, ystar, w, iterations, hatAlpha, hatBeta, hatTau, hatV, hatSg, invSigAlpha0, hatEtaSq, xi1, xi2, r, a, b, progress)}
+    fit=BRBLSS(g, y, ystar, w, iterations, hatAlpha, hatBeta, hatV, hatSg, invSigAlpha0, hatPi, hatEtaSq, xi1, xi2, r, a, b,sh0_1,sh0_0, progress)}
+  else if(prior=="Laplace"){fit= BRBL(g, y, ystar, w, iterations, hatAlpha, hatBeta, hatV, hatSg, invSigAlpha0, hatEtaSq, xi1, xi2, r, a, b, progress)}
   else{stop("The specified prior is currently not supported.")}
   out = list(fit=fit,iterations=iterations)
   return(out)

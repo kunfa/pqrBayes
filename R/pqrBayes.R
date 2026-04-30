@@ -3,9 +3,10 @@
 #' @keywords models
 #' @param g the matrix of predictors (subject to selection). Users do not need to specify an intercept which will be automatically included. 
 #' @param y the response variable.
-#' @param e a matrix of clinical covariates not subject to selection.
+#' @param u a vector of effect modifying variable of the quantile varying coefficient model. When fitting a linear model or group LASSO, u = NULL. The default value is NULL.
+#' @param e a matrix of clinical covariates not subject to selection. The default value is NULL.
 #' @param quant the quantile level specified by users. Required when robust = TRUE. Ignored (set to NULL) when robust = FALSE.The default value is 0.5.
-#' @param d a positive integer denotes the group size. When fitting a sparse linear or varying coefficient model, d = NULL.
+#' @param d a positive integer denotes the group size. When fitting a sparse linear or varying coefficient model, d = NULL. The default value is NULL.
 #' @param iterations the number of MCMC iterations. The default value is 10,000.
 #' @param burn.in the number of burn-in iterations. If NULL, the first half of MCMC iterations will be discarded as burn-ins.
 #' @param robust logical flag. If TRUE, robust methods are used. Otherwise, non-robust methods are used. The default value is TRUE.
@@ -60,26 +61,16 @@
 #' y_1=data_1$y
 #' e_1=data_1$e
 #' 
-#' fit1=pqrBayes(g,y,e,d=NULL,quant=0.5,model="linear")
-#' fit1_1=pqrBayes(g_1,y_1,e_1,d=NULL,quant=0.5,model="binary")
+#' fit1=pqrBayes(g,y,e,model="linear")
+#' fit1_1=pqrBayes(g_1,y_1,e_1,model="binary")
 
 #' \donttest{
 #'
 #' ## Non-sparse robust example (Bayesian Quantile LASSO)
-#' fit2 <- pqrBayes(
-#'   g = g, y = y, e = e, d = NULL,
-#'   quant = 0.5,
-#'   prior = "Laplace",
-#'   model = "linear"
-#' )
+#' fit2 <- pqrBayes(g, y, e, prior = "Laplace", model = "linear")
 #'
 #' ## Non-robust example (Bayesian LASSO)
-#' fit3 <- pqrBayes(
-#'   g = g, y = y, e = e, d = NULL,
-#'   quant = NULL,
-#'   robust = FALSE,
-#'   model = "linear"
-#' )
+#' fit3 <- pqrBayes(g, y, e, quant = NULL, robust = FALSE, model = "linear")
 #' }
 
 #' 
@@ -90,24 +81,14 @@
 #' y=data$y
 #' e=data$e
 #' 
-#' fit1=pqrBayes(g,y,e,d=3,quant=0.5,model="group")
+#' fit1=pqrBayes(g,y,e,d=3,model="group")
 #' \donttest{
 #'
 #' ## Non-sparse robust Bayesian version
-#' fit2 <- pqrBayes(
-#'   g = g, y = y, e = e, d = 3,
-#'   quant = 0.5,
-#'   prior = "Laplace",
-#'   model = "group"
-#' )
+#' fit2 <- pqrBayes(g, y, e, d = 3, prior = "Laplace", model = "group")
 #'
 #' ## Non-robust Bayesian version
-#' fit3 <- pqrBayes(
-#'   g = g, y = y, e = e, d = 3,
-#'   quant = NULL,
-#'   robust = FALSE,
-#'   model = "group"
-#' )
+#' fit3 <- pqrBayes(g, y, e, d = 3, quant = NULL, robust = FALSE, model = "group")
 #' }
 
 #' ## The regularized Bayesian quantile varying coefficient model
@@ -116,25 +97,16 @@
 #' g=data$g
 #' y=data$y
 #' e=data$e
-#' fit1=pqrBayes(g,y,e,quant=0.5,model="VC")
+#' u=data$u
+#' fit1=pqrBayes(g,y,u,e,model="VC")
 #'
 #' \donttest{
 #'
 #' ## Non-sparse robust Bayesian example
-#' fit2 <- pqrBayes(
-#'   g = g, y = y, e = e,
-#'   quant = 0.5,
-#'   prior = "Laplace",
-#'   model = "VC"
-#' )
+#' fit2 <- pqrBayes(g, y, u, e, prior = "Laplace", model = "VC")
 #'
 #' ## Non-robust Bayesian example
-#' fit3 <- pqrBayes(
-#'   g = g, y = y, e = e,
-#'   quant = NULL,
-#'   robust = FALSE,
-#'   model = "VC"
-#' )
+#' fit3 <- pqrBayes(g, y, u, e, quant = NULL,robust = FALSE, model = "VC")
 #' }
 
 #' @export
@@ -160,14 +132,56 @@
 
 
 
-pqrBayes <- function(g, y, e, d = NULL, quant = 0.5, iterations = 10000, 
+pqrBayes <- function(g, y, u=NULL, e=NULL, d = NULL, quant = 0.5, iterations = 10000, 
                      burn.in = NULL, robust = TRUE, prior = "SS", 
-                     model = "linear",
+                     model,
                      hyper = NULL, debugging = FALSE) {
+  
+  if (prior %in% c("HS", "HS+", "RHS") && model != "linear") {
+    stop("Priors 'HS', 'HS+' and 'RHS' are currently supported only when model = 'linear'.")
+  }
+  if (!prior %in% c("SS", "HS", "HS+", "RHS", "Laplace")) {
+    stop("prior should be one of: 'SS', 'HS', 'HS+', 'RHS' or 'Laplace'.")
+  }
+  # quant check
+  if (robust) {
+    if (is.null(quant)) {
+      stop("quant must be specified when robust = TRUE.")
+    }
+  } else {
+    if (!is.null(quant)) {
+      stop("quant must be NULL when robust = FALSE.")
+    }
+  }
+  
+  if (model != "VC" && !is.null(u)) {
+    
+    stop("Argument 'u' should be NULL unless model = 'VC'.")
+    
+  }
+  
+  if (model == "VC" && is.null(u)) {
+    
+    stop("Argument 'u' must be provided when model = 'VC'.")
+    
+  }
+  
+  
+  if (model != "group" && !is.null(d)) {
+    
+    stop("Argument 'd' should be NULL unless model = 'group'.")
+    
+  }
+  
+  if (model == "group" && is.null(d)) {
+    
+    stop("Argument 'd' must be provided when model = 'group'.")
+    
+  }
   
   if (model == "VC") {
     
-    fit = pqrBayes_vc(g, y, e, quant, iterations, burn.in, robust, prior, hyper, debugging)
+    fit = pqrBayes_vc(g, y, u, e, quant, iterations, burn.in, robust, prior, hyper, debugging)
     
   } else if (model == "linear") {
     fit = pqrBayes_lin(g, y, e, quant, iterations, burn.in, robust, prior, hyper, debugging)

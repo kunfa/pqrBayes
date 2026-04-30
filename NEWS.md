@@ -1,5 +1,9 @@
 ## News
 
+### pqrBayes 1.2.2 \[2026-04-29]
+
+* Resolved version inconsistency issues.
+
 ### pqrBayes 1.2.1 \[2026-03-14]
 
 * Fixed minor bugs.

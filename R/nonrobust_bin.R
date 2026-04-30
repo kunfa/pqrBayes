@@ -1,7 +1,4 @@
 NonRobust_bin <- function(g, y, e,iterations,prior,debugging){
-  if (prior %in% c("HS", "HS+", "RHS")) {
-    stop("The specified prior is currently not supported. Only 'SS' (spike-and-slab) prior is implemented.")
-  }
   
   p = dim(g)[2]
   
@@ -23,7 +20,7 @@ NonRobust_bin <- function(g, y, e,iterations,prior,debugging){
   hatBeta = rep(1,p)
   hatInvTauSq = rep(1,p)
   hatLambdaSq=1
-  hatSigmaSq=1
+ 
   aStar=1 
   bStar=1
   alpha=1 
@@ -35,8 +32,8 @@ NonRobust_bin <- function(g, y, e,iterations,prior,debugging){
   
   progress = ifelse(debugging, 10^(floor(log10(iterations))-1), 0)
   if(prior == "SS"){
-    fit=BBLSS(g, y, ystar, w, iterations, hatAlpha, hatBeta, hatInvTauSq, invSigAlpha0, hatPi, hatLambdaSq, hatSigmaSq, aStar, bStar, alpha, gamma, sh1, sh0, progress)}
-  else if (prior == "Laplace"){fit=BBL(g, y, ystar, w, iterations, hatBeta, hatAlpha, hatInvTauSq, invSigAlpha0, hatLambdaSq, hatSigmaSq, aStar, bStar, alpha, gamma, progress)}
+    fit=BBLSS(g, y, ystar, w, iterations, hatAlpha, hatBeta, hatInvTauSq, invSigAlpha0, hatPi, hatLambdaSq, aStar, bStar, alpha, gamma, sh1, sh0, progress)}
+  else if (prior == "Laplace"){fit=BBL(g, y, ystar, w, iterations, hatBeta, hatAlpha, hatInvTauSq, invSigAlpha0, hatLambdaSq, aStar, bStar, alpha, gamma, progress)}
   else{stop("The specified prior is currently not supported.")}
   out=list(fit=fit,iterations=iterations)
   return(out)

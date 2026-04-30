@@ -49,47 +49,35 @@ arma::vec rtnorm1(int n, arma::vec mean , arma::vec sd ,arma::vec lower_bound,ar
 
 
 double rtnorm2(double a, bool lb, double mu, double sigma) {
-  
-  // Rescale truncation point
   double az = (a - mu) / sigma;
-  double c;
+  double c = lb ? az : -az;
   
-  // Assign truncation direction
-  if (lb) {
-    c = az;
-  } else {
-    c = -az;
-  }
-  
-  double z, phi_z, u1, u2;
+  double z, u1, u2;
   
   if (c < 0.45) {
-    // Normal rejection sampling
+    // normal rejection sampling
     do {
-      u1 = R::rnorm(0, 1);  // Standard normal sample
-    } while (u1 <= c);
-    z = u1;
+      z = R::rnorm(0.0, 1.0);
+    } while (z <= c);
   } else {
-    // Exponential rejection sampling
+    // exponential rejection sampling
     do {
-      u1 = R::runif(0, 1);  // Generate uniform(0,1)
-      z = -std::log(u1) / c;  // Exponential sample
+      u1 = R::runif(0.0, 1.0);
+      z  = -std::log(u1) / c;
       
-      phi_z = std::exp(-0.5 * z * z);  // Compute phi_z
-      
-      u2 = R::runif(0, 1);  // Second uniform sample
-    } while (u2 >= phi_z);
+      u2 = R::runif(0.0, 1.0);
+    } while (u2 >= std::exp(-0.5 * z * z));
     
     z = z + c;
   }
   
-  // Apply final transformation
   if (lb) {
     return mu + sigma * z;
   } else {
     return mu - sigma * z;
   }
 }
+ 
 double rinvgaussian(double mu, double lambda){
   if(mu>1000){
     mu = 1000;
